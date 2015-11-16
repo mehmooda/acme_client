@@ -1,7 +1,7 @@
 package main
 
 import "encoding/pem"
-import "software.dcomp.co.uk/acme_client/acme"
+import "github.com/mehmooda/acme_client/acme"
 import "os"
 import "time"
 import "bytes"

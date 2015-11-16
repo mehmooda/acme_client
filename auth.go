@@ -1,6 +1,6 @@
 package main
 
-import "software.dcomp.co.uk/acme_client/acme"
+import "github.com/mehmooda/acme_client/acme"
 import "os"
 
 func PerformAuth(domain string, c *acme.Client, a *acme.Resource) bool {

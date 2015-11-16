@@ -13,8 +13,7 @@ Note: This will run "sudo systemctl reload nginx"
 
 Configuration Options:
 
-ServerURL = ACME Server directory Url
-
-HTTP01 = acme-challenge directory
-SSLKEY = ssl key to be read 
-SSLCERT = ssl certificate to be outputted
+- ServerURL = ACME Server directory Url
+- HTTP01 = acme-challenge directory
+- SSLKEY = ssl key to be read 
+- SSLCERT = ssl certificate to be outputted

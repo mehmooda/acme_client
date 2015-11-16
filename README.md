@@ -1,11 +1,11 @@
 # acme_client
 
-3 Step usage:
+3 (and a bit) Step usage:
 
 1. copy acme.ini into your working directory
 2. edit acme.ini
 3. openssl genrsa 4096 > account_key.pem
-4. acme_client register pem account_key
+4. acme_client register pem account_key.pem
 5. acme_client ... preferably in cron once a week
 
 

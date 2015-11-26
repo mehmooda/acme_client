@@ -19,7 +19,7 @@ func createCSR(key *rsa.PrivateKey, domain string) (string, error) {
 	subjectname.CommonName = domain
 	var CSR x509.CertificateRequest
 	CSR.Subject = subjectname
-	csr, err := x509.CreateCertificateRequest(rand.Reader,&CSR,key)
+	csr, err := x509.CreateCertificateRequest(rand.Reader, &CSR, key)
 	if err != nil {
 		return "", NewError(err)
 	}
@@ -30,7 +30,7 @@ func (c *Client) GetNewCert(key *rsa.PrivateKey, domain string) (*Resource, erro
 	res := new(Resource)
 	res.Resource = "new-cert"
 	res.CSR = new(CSR)
-	
+
 	csr, err := createCSR(key, domain)
 	if err != nil {
 		return nil, NewError(err)
@@ -41,9 +41,9 @@ func (c *Client) GetNewCert(key *rsa.PrivateKey, domain string) (*Resource, erro
 		return nil, NewError(err)
 	}
 	defer resp.Body.Close()
-	
+
 	if resp.StatusCode == 201 {
-		cert, err := GetCert(GetLocation(c.urls.Cert,resp.Header["Location"][0]))
+		cert, err := GetCert(GetLocation(c.urls.Cert, resp.Header["Location"][0]))
 		if err != nil {
 			return nil, NewError(err)
 		}
@@ -58,8 +58,7 @@ func (c *Client) GetNewCert(key *rsa.PrivateKey, domain string) (*Resource, erro
 	}
 }
 
-
-func GetCert(uri string) (*Resource, error){
+func GetCert(uri string) (*Resource, error) {
 	for {
 		resp, err := Get(uri)
 		if err != nil {
@@ -67,13 +66,13 @@ func GetCert(uri string) (*Resource, error){
 		}
 		defer resp.Body.Close()
 		if resp.StatusCode == 202 {
-			tryafter, err :=strconv.Atoi(resp.Header.Get("Retry-After"))
+			tryafter, err := strconv.Atoi(resp.Header.Get("Retry-After"))
 			if err != nil {
 				tryafter = 1
 			}
-			<-time.After(time.Duration(tryafter)*time.Second)
+			<-time.After(time.Duration(tryafter) * time.Second)
 			continue
-			
+
 		}
 		if resp.StatusCode == 200 {
 			r := new(Resource)
@@ -97,19 +96,19 @@ func GetCert(uri string) (*Resource, error){
 
 func (r *Resource) CertificateGetIssuer() string {
 	for _, header := range r.Links {
-		v := strings.Split(header,";")
-		if(v[1]=="rel=\"up\""){
-			agr := v[0][1:len(v[0])-1]
+		v := strings.Split(header, ";")
+		if v[1] == "rel=\"up\"" {
+			agr := v[0][1 : len(v[0])-1]
 			return GetLocation(r.Location, agr)
 		}
 	}
-	
+
 	return ""
 }
 
-func (c *Client) GetCertChain(certurl string) ([]*Resource, error){
+func (c *Client) GetCertChain(certurl string) ([]*Resource, error) {
 	var certs []*Resource
-	
+
 	for {
 		cert, err := GetCert(certurl)
 		if err != nil {

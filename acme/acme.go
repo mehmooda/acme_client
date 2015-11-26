@@ -8,23 +8,21 @@ import "io"
 import "net/url"
 
 type ACME_URLS struct {
-	Auth string `json:"new-authz"`
-	Cert string `json:"new-cert"`
-	Reg string `json:"new-reg"`
+	Auth   string `json:"new-authz"`
+	Cert   string `json:"new-cert"`
+	Reg    string `json:"new-reg"`
 	Revoke string `json:"revoke-cert"`
 }
 
-
 type Client struct {
-	key *rsa.PrivateKey
-	urls ACME_URLS
+	key          *rsa.PrivateKey
+	urls         ACME_URLS
 	replay_nonce string
 }
 
 type AcmeError struct {
-	Type string `json:"type,omitempty"`
+	Type   string `json:"type,omitempty"`
 	Detail string `json:"detail,omitempty"`
-
 }
 
 func (e AcmeError) Error() string {
@@ -34,13 +32,13 @@ func (e AcmeError) Error() string {
 // CreateACMEServer returns a Client from an acme server directory uri
 func CreateACMEClient(directoryuri string) (*Client, error) {
 	c := new(Client)
-	
+
 	resp, err := http.Get(directoryuri)
 	if err != nil {
 		return nil, NewError(err)
 	}
 	defer resp.Body.Close()
-	
+
 	if resp.StatusCode != 200 {
 		return nil, NewErrorString("Directory URI returned Invalid Response Code")
 	}
@@ -67,30 +65,30 @@ func (c *Client) Post(uri string, r *Resource) (*http.Response, error) {
 	if err != nil {
 		return nil, NewError(err)
 	}
-	
-	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(v))	
-    client := &http.Client{}
-    resp, err := client.Do(req)
-    if err != nil {
+
+	req, err := http.NewRequest("POST", uri, bytes.NewBuffer(v))
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
 		return nil, NewError(err)
-    }
+	}
 	c.replay_nonce = resp.Header["Replay-Nonce"][0]
 	return resp, nil
 }
 
-func Get(uri string) (*http.Response, error){
+func Get(uri string) (*http.Response, error) {
 	return http.Get(uri)
 }
 
 func decode(r io.Reader, i interface{}) error {
 	dec := json.NewDecoder(r)
 	return dec.Decode(i)
-	
+
 }
 
 func GetLocation(currenturl string, newurl string) string {
 	u, _ := url.Parse(newurl)
 	base, _ := url.Parse(currenturl)
-    newu := base.ResolveReference(u)
+	newu := base.ResolveReference(u)
 	return newu.String()
 }

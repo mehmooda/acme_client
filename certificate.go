@@ -23,16 +23,15 @@ func GetCertificate(domain string, client *acme.Client) {
 		// Not Checking chain[0].Certificate.NotBefore
 		// A lot of servers mess up their timezone information and have wrong time
 		// Needs at least 30 days validity
-		if time.Now().After(chain[0].Certificate.NotAfter.AddDate(0,0,-30)) {
+		if time.Now().After(chain[0].Certificate.NotAfter.AddDate(0, 0, -30)) {
 			LogE("Certitfcate has less than 30 days validity")
 		} else {
-			LogV("Installing Chain")		
-			InstallCertificates(domain,chain)
-			return 		
+			LogV("Installing Chain")
+			InstallCertificates(domain, chain)
+			return
 		}
 	}
-	
-	
+
 	sslkey, ok := GLOBAL.HOST[domain]["SSLKEY"]
 	if !ok {
 		LogE("No SSLKEY given for", domain)
@@ -54,7 +53,7 @@ func GetCertificate(domain string, client *acme.Client) {
 	if err != nil {
 		LogE(err)
 	}
-	GLOBAL.HOST[domain]["CERTURL"]=cert.Location
+	GLOBAL.HOST[domain]["CERTURL"] = cert.Location
 	UpdateConfig()
 	LogV("Downloading New Cert Chain")
 
@@ -65,13 +64,13 @@ func GetCertificate(domain string, client *acme.Client) {
 	}
 	LogV("Installing Chain")
 
-	InstallCertificates(domain,chain)
+	InstallCertificates(domain, chain)
 }
 
-func InstallCertificates(domain string,certs []*acme.Resource){
-	buf := new(bytes.Buffer)	
+func InstallCertificates(domain string, certs []*acme.Resource) {
+	buf := new(bytes.Buffer)
 	for _, cert := range certs {
-		var a pem.Block 
+		var a pem.Block
 		a.Type = "CERTIFICATE"
 		a.Bytes = cert.Certificate.Raw
 		err := pem.Encode(buf, &a)
@@ -80,16 +79,15 @@ func InstallCertificates(domain string,certs []*acme.Resource){
 			return
 		}
 	}
-	
+
 	CertificateFile := buf.Bytes()
-	
+
 	var oldSHA, newSHA []byte
 	hasher := sha256.New()
 	hasher.Write(CertificateFile)
 	newSHA = hasher.Sum(nil)
 	LogV("SHA256 of Certificate File", hex.EncodeToString(newSHA))
-	
-	
+
 	file, err := os.Open(GLOBAL.HOST[domain]["SSLCERT"])
 	if err == nil {
 		hasher := sha256.New()
@@ -97,18 +95,18 @@ func InstallCertificates(domain string,certs []*acme.Resource){
 		oldSHA = hasher.Sum(nil)
 		LogV("SHA256 of Existing Certificate File", hex.EncodeToString(oldSHA))
 		file.Close()
-		
-		if bytes.Equal(oldSHA,newSHA) {
+
+		if bytes.Equal(oldSHA, newSHA) {
 			LogV("Certificate already installed Not Installing")
 			return
 		}
-		
+
 	}
-	
+
 	file, err = os.Create(GLOBAL.HOST[domain]["SSLCERT"])
 	if err != nil {
 		LogE(err)
-		return 
+		return
 	}
 	_, err = file.Write(CertificateFile)
 	if err != nil {
@@ -116,12 +114,12 @@ func InstallCertificates(domain string,certs []*acme.Resource){
 	}
 	file.Close()
 	LogV("Reloading Server")
-	
+
 	reloadNginx()
 }
 
-func reloadNginx(){
-	v := exec.Command("/usr/bin/sh","-c","sudo systemctl reload nginx")
+func reloadNginx() {
+	v := exec.Command("/usr/bin/sh", "-c", "sudo systemctl reload nginx")
 	err := v.Run()
 	if err != nil {
 		LogE(err)

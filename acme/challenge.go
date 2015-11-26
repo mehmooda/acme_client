@@ -7,13 +7,12 @@ import _ "crypto/sha256"
 import "crypto"
 import "fmt"
 
-
 type Challenge struct {
-	Type string `json:"type,omitempty"`
-	Uri string `json:"uri,omitempty"`
-	Status string `json:"status,omitempty"`
+	Type      string     `json:"type,omitempty"`
+	Uri       string     `json:"uri,omitempty"`
+	Status    string     `json:"status,omitempty"`
 	Validated *time.Time `json:"validated,omitempty"`
-	Error *AcmeError `json:"error,omitempty"`
+	Error     *AcmeError `json:"error,omitempty"`
 	//http-01, tls-sni-01, dns-01
 	Token string `json:"token,omitempty"`
 	//http-01, tls-sni-01, dns-01
@@ -21,11 +20,11 @@ type Challenge struct {
 	//tls-sni-01
 	TLSSNI_n int `json:"n,omitempty"`
 	//dns-01
-	
+
 	//proofOfPossession-01
 	//POPCerts []string `json:"certs"`
 	//AccountKey
-	
+
 }
 
 func (c *Client) ChallengeAccept(chal *Challenge) error {
@@ -33,7 +32,7 @@ func (c *Client) ChallengeAccept(chal *Challenge) error {
 	res.Resource = "challenge"
 	res.Challenge = new(Challenge)
 	res.Challenge.KeyAuthorization = chal.KeyAuthorization
-	resp, err := c.Post(chal.Uri,res)
+	resp, err := c.Post(chal.Uri, res)
 	if err != nil {
 		return NewError(err)
 	}
@@ -50,9 +49,6 @@ func (c *Client) ChallengeAccept(chal *Challenge) error {
 	return nil
 }
 
-
-
-
 func (c *Client) ChallengePoll(chal *Challenge) error {
 	for {
 		challenge, err := GetChallenge(chal.Uri)
@@ -63,7 +59,7 @@ func (c *Client) ChallengePoll(chal *Challenge) error {
 			return NewError(challenge.Error)
 		}
 		if challenge.Status == "pending" || challenge.Status == "processing" {
-			<-time.After(1*time.Second)
+			<-time.After(1 * time.Second)
 			continue
 		}
 		if challenge.Status == "valid" {
@@ -99,7 +95,7 @@ func (c *Challenge) SetKeyAuth(client *Client) error {
 	if c.KeyAuthorization != "" {
 		return nil
 	}
-	
+
 	jwk := jose.JsonWebKey{Key: client.key}
 	t, err := jwk.Thumbprint(crypto.SHA256)
 	if err != nil {
@@ -109,17 +105,17 @@ func (c *Challenge) SetKeyAuth(client *Client) error {
 	return nil
 }
 
-func (c *Challenge) HTTP01(client *Client) (string, string, error){
+func (c *Challenge) HTTP01(client *Client) (string, string, error) {
 	if c == nil {
-		return "","",NewErrorString("Not Challenge")
+		return "", "", NewErrorString("Not Challenge")
 	}
-	if c.Type !=  "http-01" {
-		return "", "",NewErrorString("Not a HTTP01 Challenge")
+	if c.Type != "http-01" {
+		return "", "", NewErrorString("Not a HTTP01 Challenge")
 	}
-	
+
 	err := c.SetKeyAuth(client)
 	if err != nil {
-		return "","",NewError(err)
+		return "", "", NewError(err)
 	}
 	return c.Token, c.KeyAuthorization, nil
 

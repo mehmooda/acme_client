@@ -4,26 +4,24 @@ import "crypto/rsa"
 import "strings"
 
 type Registration struct {
-//	Key string `json:"key,omitempty"`
-	Contact []string `json:"contact,omitempty"`
-	Agreement string `json:"agreement,omitempty"`
+	//	Key string `json:"key,omitempty"`
+	Contact        []string `json:"contact,omitempty"`
+	Agreement      string   `json:"agreement,omitempty"`
 	Authorizations []string `json:"authorizations,omitempty"`
-	Certificates string `json:"certificates,omitempty"`
+	Certificates   string   `json:"certificates,omitempty"`
 }
-
 
 func (c *Client) SetAccountKey(key *rsa.PrivateKey) {
 	c.key = key
 }
 
-	
 func (c *Client) GetRegistration() (*Resource, error) {
 
 	res := new(Resource)
 	postresource := new(Resource)
 	postresource.Resource = "new-reg"
-	
-	resp, err := c.Post(c.urls.Reg,postresource)
+
+	resp, err := c.Post(c.urls.Reg, postresource)
 	if err != nil {
 		return nil, NewError(err)
 	}
@@ -63,10 +61,10 @@ func (c *Client) GetRegistration() (*Resource, error) {
 
 func (c *Client) AgreeToTerms(r *Resource, terms string) error {
 	ar := new(Resource)
-	ar.Resource="reg"
+	ar.Resource = "reg"
 	ar.Registration = new(Registration)
 	ar.Agreement = terms
-	resp, err := c.Post(r.Location,ar)
+	resp, err := c.Post(r.Location, ar)
 	if err != nil {
 		return NewError(err)
 	}
@@ -78,8 +76,8 @@ func (c *Client) AgreeToTerms(r *Resource, terms string) error {
 		return nil
 	}
 	var a AcmeError
-	err = decode(resp.Body,&a)
-		if err != nil {
+	err = decode(resp.Body, &a)
+	if err != nil {
 		return NewError(a)
 	}
 	return NewErrorString(resp.Status)
@@ -87,9 +85,9 @@ func (c *Client) AgreeToTerms(r *Resource, terms string) error {
 
 func (r *Resource) NeedsAgreement() string {
 	for _, header := range r.Links {
-		v := strings.Split(header,";")
-		if(v[1]=="rel=\"terms-of-service\""){
-			agr := v[0][1:len(v[0])-1]
+		v := strings.Split(header, ";")
+		if v[1] == "rel=\"terms-of-service\"" {
+			agr := v[0][1 : len(v[0])-1]
 			if r.Agreement != agr {
 				return agr
 			} else {
@@ -97,6 +95,6 @@ func (r *Resource) NeedsAgreement() string {
 			}
 		}
 	}
-	
+
 	return ""
 }

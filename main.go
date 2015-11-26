@@ -52,12 +52,12 @@ func main() {
 			}
 			s := registration.NeedsAgreement()
 			if s != "" {
-			LogV("Agreeing to Terms:", s)
-			err = client.AgreeToTerms(registration, s)
-			if err != nil {
-				LogE(err)
-				return
-			}
+				LogV("Agreeing to Terms:", s)
+				err = client.AgreeToTerms(registration, s)
+				if err != nil {
+					LogE(err)
+					return
+				}
 			}
 			LogN(registration)
 			UpdateConfig()
@@ -68,7 +68,7 @@ func main() {
 	if !LoadConfiguration() {
 		return
 	}
-	
+
 	client, err := acme.CreateACMEClient(*ACME_SERVER)
 	LogV("Getting Registration")
 	client.SetAccountKey(ACCOUNT_KEY)
@@ -85,20 +85,19 @@ func main() {
 		if a == nil {
 			continue
 		}
-		if a.AuthNeedsCompletion(){
+		if a.AuthNeedsCompletion() {
 			if !PerformAuth(name, client, a) {
-				LogE("Unable to Authorize:",name)
+				LogE("Unable to Authorize:", name)
 			}
 			//Update Authorization Object
 			a = GetAuth(name, client)
 		}
-		
-		
-		if a.AuthValid(){
+
+		if a.AuthValid() {
 			GetCertificate(name, client)
 		}
 	}
-	
+
 }
 
 func GetAuth(name string, client *acme.Client) *acme.Resource {
@@ -119,7 +118,7 @@ func GetAuth(name string, client *acme.Client) *acme.Resource {
 		}
 
 	}
-	GLOBAL.HOST[name]["AUTH"]=auth.Location
+	GLOBAL.HOST[name]["AUTH"] = auth.Location
 	UpdateConfig()
 	return auth
 }

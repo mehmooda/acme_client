@@ -10,21 +10,21 @@ type Resource struct {
 	*Authorization
 	*Challenge
 	*CSR
-	Location string `json:"-"`
-	Links []string `json:"-"`
+	Location    string            `json:"-"`
+	Links       []string          `json:"-"`
 	Certificate *x509.Certificate `json:"-"`
 }
 
 func (r *Resource) Sign(c *Client) ([]byte, error) {
-	s, err := jose.NewSigner(jose.PS512,c.key)
+	s, err := jose.NewSigner(jose.PS512, c.key)
 	if err != nil {
 		return nil, NewError(err)
 	}
-	
+
 	resourcejson, err := json.Marshal(r)
 	if err != nil {
 		return nil, NewError(err)
-	}	
+	}
 	s.SetNonceSource(c)
 	jws, err := s.Sign(resourcejson)
 	if err != nil {

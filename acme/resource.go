@@ -16,7 +16,7 @@ type Resource struct {
 }
 
 func (r *Resource) Sign(c *Client) ([]byte, error) {
-	s, err := jose.NewSigner(jose.PS512, c.key)
+	s, err := jose.NewSigner(jose.RS256, c.key)
 	if err != nil {
 		return nil, NewError(err)
 	}

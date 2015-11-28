@@ -1,19 +1,30 @@
 # acme_client
 
-3 (and a bit) Step usage:
+Requests certificates from an acme compliant endpoint (letsencrypt)
 
-1. copy acme.ini into your working directory
-2. edit acme.ini
-3. openssl genrsa 4096 > account_key.pem
-4. acme_client register pem account_key.pem
-5. acme_client ... preferably in cron once a week
+##Quickstart
+
+1. Register Account Key (will create acme.ini in current working directory)
+  - New Key:
+    1. _openssl genrsa 4096 > account\_key.pem_
+    1. _acme\_client register pem account\_key.pem_
+  - Existing Key:
+    1. _acme\_client register jwk private\_key.json_
+1. edit acme.ini
+1. _acme\_client_ (preferably as cron or systemd timer)
 
 
-Note: This will run "sudo systemctl reload nginx"
+##Configuration
 
-Configuration Options:
+internal use denotes a variable which will be written and read by acme_client
 
-- ServerURL = ACME Server directory Url
-- HTTP01 = acme-challenge directory
-- SSLKEY = ssl key to be read 
-- SSLCERT = ssl certificate to be outputted
+|Variable Name|Valid Location|Description|
+|---|---|---|
+|ServerURL|ROOT|acme server address|
+|ACCOUNT\_KEY|ROOT (internal use)|json encoding of rsa.PrivateKey use acme_client register|
+|HTTP01|Domain|directory path where acme_client should place challenge files for authentication|
+|SSLKEY|Domain|sslkey in pem format for csr generation|
+|SSLECRT|Domain|sslcrt in pem format where acme_cient will place certificate|
+|AUTH|Domain (internal use)|URL for auth object|
+|CERTURL|Domain (internal use)|URL for existing certificate|
+
